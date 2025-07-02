@@ -57,9 +57,10 @@ def main():
     embedding_params = {}
     if embedding_choice == 'OpenAI':
         openai_embed_model = st.sidebar.text_input('OpenAI Embedding Model', 'text-embedding-ada-002')
-        openai_embed_key = st.sidebar.text_input('OpenAI API Key', type='password', value=os.environ.get('OPENAI_API_KEY', ''))
-        embedding_params = {'model': openai_embed_model, 'api_key': openai_embed_key}
-        embedder = OpenAIEmbedding(**embedding_params)
+        embedding_params = {'model': openai_embed_model}
+        # Always fetch the latest API key from environment at build time
+        def get_embedder():
+            return OpenAIEmbedding(model=openai_embed_model, api_key=os.environ.get('OPENAI_API_KEY', ''))
     else:
         st.error('Unsupported embedding model')
         return
@@ -80,9 +81,10 @@ def main():
     llm_params = {}
     if llm_choice == 'OpenAI':
         openai_llm_model = st.sidebar.text_input('OpenAI LLM Model', 'gpt-4o-mini')
-        openai_llm_key = st.sidebar.text_input('OpenAI LLM API Key', type='password', value=os.environ.get('OPENAI_API_KEY', ''))
-        llm_params = {'model': openai_llm_model, 'api_key': openai_llm_key}
-        llm = OpenAILLM(**llm_params)
+        llm_params = {'model': openai_llm_model}
+        # Always fetch the latest API key from environment at build time
+        def get_llm():
+            return OpenAILLM(model=openai_llm_model, api_key=os.environ.get('OPENAI_API_KEY', ''))
     else:
         st.error('Unsupported LLM')
         return
@@ -101,16 +103,42 @@ def main():
             },
             'embedding': {
                 'type': embedding_choice.lower(),
-                'params': embedding_params
+                'params': {**embedding_params, 'api_key': 'PULL FROM ENVIRONMENT VARIABLE'}
             },
             'llm': {
                 'type': llm_choice.lower(),
-                'params': llm_params
+                'params': {**llm_params, 'api_key': 'PULL FROM ENVIRONMENT VARIABLE'}
             }
         }
+        import yaml
+        from yaml.representer import SafeRepresenter
+        class QuotedStr(str):
+            pass
+        def quoted_presenter(dumper, data):
+            return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='"')
+        yaml.add_representer(QuotedStr, quoted_presenter)
+
+        # Recursively wrap all string values (except api_key) in QuotedStr
+        def wrap_quotes(obj, parent_key=None):
+            if isinstance(obj, dict):
+                return {k: wrap_quotes(v, k) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [wrap_quotes(i, parent_key) for i in obj]
+            elif isinstance(obj, str):
+                # Only wrap in quotes if not a 'type' attribute
+                if parent_key == 'type':
+                    return obj
+                return QuotedStr(obj)
+            else:
+                return obj
+
+        quoted_config = wrap_quotes(config_data)
         config_path = os.path.join(os.path.dirname(__file__), 'config', 'config.yaml')
         with open(config_path, 'w') as f:
-            yaml.dump(config_data, f)
+            yaml.dump(quoted_config, f, default_flow_style=False, sort_keys=False)
+        # Always fetch the latest API key from environment at build time
+        embedder = get_embedder() if embedding_choice == 'OpenAI' else embedder
+        llm = get_llm() if llm_choice == 'OpenAI' else llm
         pipeline = RAGPipeline(datasource, embedder, vectordb, llm)
         with st.spinner('Building vector store...'):
             pipeline.build_vector_store()

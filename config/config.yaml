@@ -1,18 +1,18 @@
 datasource:
-  params:
-    path: transaction_data.csv
   type: csv
-embedding:
   params:
-    #api_k: "PULL FROM ENVIRONMENT VARIABLE"
-    model: text-embedding-ada-002
-  type: openai
-llm:
-  params:
-    #api_k: "PULL FROM ENVIRONMENT VARIABLE"
-    model: gpt-4o-mini
-  type: openai
+    path: "transaction_data.csv"
 vectordb:
-  params:
-    persist_directory: ./chromadb
   type: chromadb
+  params:
+    persist_directory: "./chromadb"
+embedding:
+  type: openai
+  params:
+    model: "text-embedding-ada-002"
+    api_key: "PULL FROM ENVIRONMENT VARIABLE"
+llm:
+  type: openai
+  params:
+    model: "gpt-4o-mini"
+    api_key: "PULL FROM ENVIRONMENT VARIABLE"
