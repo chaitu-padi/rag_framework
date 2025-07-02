@@ -1,0 +1,27 @@
+# Core
+python-dotenv
+pyyaml
+
+# Data sources
+pandas>=1.4,<3.0
+sqlalchemy>=1.4,<3.0
+pyhive[hive]
+
+# Embeddings and LLMs
+openai>=1.0.0
+
+# Vector DB
+chromadb==0.4.22
+
+# UI
+streamlit>=1.25
+
+# Compatibility
+numpy>=1.23,<2.0.0
+
+# Optional: for RDBMS/Hive
+psycopg2-binary
+mysql-connector-python
+
+# For debugging/logging
+loguru

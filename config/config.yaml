@@ -1,0 +1,18 @@
+datasource:
+  params:
+    path: transaction_data.csv
+  type: csv
+embedding:
+  params:
+    api_key: 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
+    model: text-embedding-ada-002
+  type: openai
+llm:
+  params:
+    api_key: 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
+    model: gpt-4o-mini
+  type: openai
+vectordb:
+  params:
+    persist_directory: ./chromadb
+  type: chromadb
