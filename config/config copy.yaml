@@ -12,10 +12,10 @@ embedding:
   type: openai
   params:
     model: "text-embedding-ada-002"
-    api_key: "PULL FROM ENVIRONMENT VARIABLE"
+    #api_key: "PULL FROM ENVIRONMENT VARIABLE"
 
 llm:
   type: openai
   params:
     model: "gpt-4o-mini"
-    api_key: "PULL FROM ENVIRONMENT VARIABLE"
+    #api_key: "PULL FROM ENVIRONMENT VARIABLE"

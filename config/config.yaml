@@ -4,12 +4,12 @@ datasource:
   type: csv
 embedding:
   params:
-    api_key: "GET FROM ENV VARIABLE"
+    #api_key: "PULL FROM ENVIRONMENT VARIABLE"
     model: text-embedding-ada-002
   type: openai
 llm:
   params:
-    api_key: "GET FROM ENV VARIABLE"
+    #api_key: "PULL FROM ENVIRONMENT VARIABLE"
     model: gpt-4o-mini
   type: openai
 vectordb:
